@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChaseBoard QA | Release regression packs, written down</title>
+<meta name="description" content="ChaseBoard QA writes fixed-scope release regression packs for small software product teams in Bengaluru that ship every two weeks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#E8890C;   /* Signal Amber */
+    --secondary:#16324F; /* Deep Ink Blue */
+    --contrast:#141414;  /* Near Black */
+    --light:#F7F1E6;     /* Warm Cream */
+    --dark:#23272B;      /* Charcoal Slate */
+    --ink:#141414;       /* body text on cream */
+    --paper:#FFFFFF;
+    --h1:clamp(40px, 14px + 4vw, 80px);
+    --h2:clamp(32px, 16px + 2.2vw, 52px);
+    --figure:clamp(64px, 24px + 5.5vw, 100px);
+    --h3:clamp(22px, 18px + 0.7vw, 28px);
+    --lead:clamp(18px, 16px + 0.6vw, 22px);
+    --body:clamp(17px, 16px + 0.3vw, 18px);
+    --label:14px;
+    --radius:16px;
+    --pad:56px;
+  }
+  @media (min-width:600px){ :root{ --pad:72px; } }
+  @media (min-width:1024px){ :root{ --pad:96px; } }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--dark);
+    color:var(--ink);
+    font-family:"DM Sans",system-ui,sans-serif;
+    font-size:var(--body);
+    line-height:1.6;
+    padding-bottom:0;
+  }
+  img{display:block;max-width:100%}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--secondary);outline-offset:2px}
+
+  .wrap{max-width:1200px;margin:0 auto;padding:0 20px;width:100%}
+  .narrow{max-width:68ch}
+  section{padding-top:var(--pad);padding-bottom:var(--pad)}
+  h1,h2,h3,.font-display{font-family:"Outfit",system-ui,sans-serif;font-weight:800;letter-spacing:-0.01em}
+  h1{font-size:var(--h1);line-height:1.05;margin:0 0 16px;max-width:14ch}
+  h2{font-size:var(--h2);line-height:1.1;margin:0 0 20px;max-width:20ch}
+  h3{font-size:var(--h3);line-height:1.2;font-weight:700;margin:0 0 6px}
+  p{margin:0 0 12px}
+  .lead{font-size:var(--lead);font-weight:500;line-height:1.45;max-width:46ch}
+  .label{font-size:var(--label);font-weight:600;line-height:1.4;text-transform:uppercase;letter-spacing:0.08em}
+
+  /* buttons */
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    height:56px;padding:0 28px;border:0;border-radius:var(--radius);
+    font-family:"Outfit",system-ui,sans-serif;font-weight:700;font-size:18px;line-height:1;
+    text-decoration:none;cursor:pointer;
+    background:var(--primary);color:var(--ink);
+  }
+  .btn.dark{background:var(--contrast);color:var(--light)}
+  .btn.blue{background:var(--secondary);color:var(--light)}
+  .btn.cream{background:var(--light);color:var(--ink)}
+  .btn:active{transform:translateY(1px)}
+  .btn svg{width:24px;height:24px}
+
+  /* header */
+  header{position:absolute;top:0;left:0;right:0;z-index:5}
+  .head{display:flex;align-items:center;justify-content:space-between;height:84px}
+  .wordmark{font-family:"Outfit",system-ui,sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.01em;text-decoration:none}
+  .head .btn{height:48px;padding:0 20px;font-size:16px}
+
+  /* 1 hero */
+  .hero{background:var(--primary);color:var(--ink);padding-top:120px;padding-bottom:0}
+  .hero-grid{display:grid;grid-template-columns:1fr;gap:28px}
+  .hero-copy{padding-bottom:var(--pad)}
+  .hero-photo{margin:0}
+  .hero-photo img{width:100%;height:100%;min-height:260px;aspect-ratio:16 / 9;object-fit:cover;border-radius:0}
+  .hero .cta{margin-top:24px}
+
+  /* 2 proof */
+  .proof{background:var(--dark);color:var(--light)}
+  .who{display:flex;align-items:center;gap:16px;margin-bottom:28px}
+  .who img{width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--primary)}
+  .who .name{font-family:"Outfit",system-ui,sans-serif;font-weight:800;font-size:24px;margin:0}
+  .who .role{margin:0;font-size:var(--label);text-transform:uppercase;letter-spacing:0.08em;color:var(--primary)}
+  .proof h2{color:var(--light)}
+  .proof .intro{max-width:60ch}
+  .figures{display:grid;grid-template-columns:1fr;gap:28px;margin-top:36px}
+  .figure .big{font-family:"Outfit",system-ui,sans-serif;font-weight:800;font-size:var(--figure);line-height:1;color:var(--primary);margin:0}
+  .figure .cap{margin:8px 0 0;font-size:16px;font-weight:600}
+  .figure .promise{font-size:var(--h3);font-weight:700;line-height:1.25;color:var(--light);margin:0;font-family:"Outfit",system-ui,sans-serif}
+  .figure .cap.under{color:rgba(247,241,230,0.75)}
+
+  /* 3 what you get */
+  .get{background:var(--light);color:var(--ink)}
+  .tiles{display:grid;grid-template-columns:1fr;gap:16px;margin-top:36px}
+  .tile{background:var(--paper);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
+  .tile .body{padding:24px}
+  .tile.tall{grid-row:auto}
+  .tile img{width:100%;height:280px;object-fit:cover;object-position:center 30%}
+  .panel{padding:32px 24px;border-radius:var(--radius);min-height:180px;display:flex;flex-direction:column;justify-content:flex-end}
+  .panel.amber{background:var(--primary);color:var(--ink)}
+  .panel.blue{background:var(--secondary);color:var(--light)}
+  .panel .ic{width:24px;height:24px;margin-bottom:auto}
+  .panel.blue .ic{color:var(--primary)}
+  .panel.amber .ic{color:var(--secondary)}
+
+  /* 4 how it works */
+  .how{background:var(--secondary);color:var(--light)}
+  .how h2{color:var(--light)}
+  .how-grid{display:grid;grid-template-columns:1fr;gap:32px;margin-top:36px}
+  .steps{display:grid;gap:28px}
+  .step .num{font-family:"Outfit",system-ui,sans-serif;font-weight:800;font-size:var(--figure);line-height:1;color:var(--primary);display:block}
+  .step p{margin:6px 0 0;max-width:52ch;color:rgba(247,241,230,0.9)}
+  .how-photo{margin:0}
+  .how-photo img{width:100%;height:100%;min-height:320px;object-fit:cover;border-radius:var(--radius)}
+
+  /* 5 price */
+  .price{background:var(--contrast);color:var(--light)}
+  .price .amount{font-family:"Outfit",system-ui,sans-serif;font-weight:800;font-size:var(--h2);color:var(--primary);margin:0 0 12px}
+  .price .included{max-width:56ch;color:rgba(247,241,230,0.92)}
+  .faq{margin-top:32px;border-top:1px solid rgba(247,241,230,0.2);padding-top:24px;max-width:70ch}
+  .faq p{margin:0 0 14px}
+  .faq b{color:var(--primary)}
+
+  /* 6 enquiry */
+  .enquiry{background:var(--primary);color:var(--ink)}
+  .enquiry .big-line{font-family:"Outfit",system-ui,sans-serif;font-weight:800;font-size:clamp(32px, 22px + 2vw, 48px);line-height:1.1;margin:0 0 20px;max-width:22ch}
+  .actions{display:flex;flex-wrap:wrap;gap:14px}
+
+  /* 7 footer */
+  footer{background:var(--dark);color:var(--light);padding-top:48px;padding-bottom:48px}
+  footer .fname{font-family:"Outfit",system-ui,sans-serif;font-weight:800;font-size:22px;margin:0 0 10px}
+  footer a{color:var(--primary)}
+  footer .credit{margin-top:16px;font-size:var(--label);color:rgba(247,241,230,0.7);max-width:60ch}
+
+  /* phone sticky bar */
+  .bar{position:fixed;left:0;right:0;bottom:0;height:56px;background:var(--secondary);display:none;align-items:center;justify-content:center;z-index:10}
+  .bar a{color:var(--light);font-family:"Outfit",system-ui,sans-serif;font-weight:700;text-decoration:none;font-size:16px;height:100%;width:100%;display:flex;align-items:center;justify-content:center}
+
+  @media (max-width:699px){
+    .bar{display:flex}
+    body{padding-bottom:72px}
+    .hero-photo img{aspect-ratio:4 / 3;min-height:0}
+  }
+  @media (min-width:700px){
+    .tiles{grid-template-columns:1fr 1fr}
+    .tile.tall{grid-row:span 2}
+    .tile.tall img{height:100%;min-height:520px}
+    .figures{grid-template-columns:repeat(3,1fr)}
+    .how-grid{grid-template-columns:1.3fr 1fr;align-items:start}
+    .how-photo img{min-height:100%}
+    footer .fname{font-size:26px}
+  }
+  @media (min-width:900px){
+    .hero{padding-bottom:0}
+    .hero-grid{grid-template-columns:55% 45%;gap:0;align-items:stretch}
+    .hero-copy{padding-bottom:var(--pad);padding-right:32px}
+    .hero-photo img{aspect-ratio:auto;height:100%;min-height:520px;border-radius:0}
+    .proof .whose{display:grid;grid-template-columns:1fr;gap:0}
+  }
+
+  /* motion */
+  .reveal{opacity:0;transform:translateY(16px);animation:rise 520ms ease-out forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1;transform:none;animation:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap head">
+    <a class="wordmark" href="#top" aria-label="ChaseBoard QA home">ChaseBoard QA</a>
+    <a class="btn dark" href="https://cal.com/ranjitha/20-minute-intro-call">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+      Book a 20 minute call
+    </a>
+  </div>
+</header>
+
+<!-- 1 HERO -->
+<section class="hero reveal" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1>Release regression packs, written down. Rs 30,000 a project.</h1>
+        <p class="lead">For small software product teams in Bengaluru that ship every two weeks.</p>
+        <p class="narrow">Test cases live in someone&rsquo;s head. Bugs get retested from memory, and the same failure ships twice. I write the pack down so it does not.</p>
+        <div class="cta">
+          <a class="btn blue" href="https://cal.com/ranjitha/20-minute-intro-call">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+            Book a 20 minute call
+          </a>
+        </div>
+      </div>
+      <figure class="hero-photo">
+        <img src="images/speaking.jpg" width="1376" height="768" fetchpriority="high" alt="Ranjitha of ChaseBoard QA speaking, gesturing as she presents in an office">
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 2 PROOF -->
+<section class="proof reveal">
+  <div class="wrap">
+    <div class="who">
+      <img src="images/profile.jpg" width="1024" height="1024" loading="lazy" alt="Ranjitha, founder of ChaseBoard QA">
+      <div>
+        <p class="name">Ranjitha</p>
+        <p class="role">Founder, ChaseBoard QA</p>
+      </div>
+    </div>
+    <div class="whose">
+      <h2>Release regression packs for teams with no QA lead</h2>
+      <p class="intro">I write release regression packs for small product teams in Bengaluru that ship every two weeks. I take the last few releases and leave a written pack behind.</p>
+      <p class="intro">I work with teams that have no QA lead and no written regression suite. Teams were shipping every two weeks with the test cases in someone&rsquo;s head, and I wanted the pack written down so the same failure does not ship twice.</p>
+    </div>
+    <div class="figures">
+      <div class="figure">
+        <p class="big">Just starting</p>
+        <p class="cap under">In the work</p>
+      </div>
+      <div class="figure">
+        <p class="big">1</p>
+        <p class="cap under">Release covered</p>
+      </div>
+      <div class="figure">
+        <p class="promise">&ldquo;I catch defects before they reach customers.&rdquo;</p>
+        <p class="cap under">What I am for</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 WHAT YOU GET -->
+<section class="get reveal">
+  <div class="wrap">
+    <h2>What you get</h2>
+    <p class="narrow">Three things, built around your last few releases.</p>
+    <div class="tiles">
+      <article class="tile tall">
+        <img src="images/shot-1.jpg" width="896" height="1200" loading="lazy" alt="Ranjitha at her desk, working on a release">
+        <div class="body">
+          <h3>Release Defect Chase Board</h3>
+          <p>Every open defect in the release on one screen, with its age and its owner.</p>
+        </div>
+      </article>
+      <article class="panel amber">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+        <div>
+          <h3>Defect Intake Form to Shared Defect Register</h3>
+          <p>A form that lands every bug in one shared register, so nothing lives in a chat.</p>
+        </div>
+      </article>
+      <article class="panel blue">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+        <div>
+          <h3>Monday QA Digest</h3>
+          <p>A short digest every Monday at 7:30 pm IST, so the week starts with what is open.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 4 HOW IT WORKS -->
+<section class="how reveal">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <div class="how-grid">
+      <div class="steps">
+        <div class="step">
+          <span class="num">01</span>
+          <h3>I take your last few releases.</h3>
+          <p>You point me at the releases you have just shipped.</p>
+        </div>
+        <div class="step">
+          <span class="num">02</span>
+          <h3>I build the pack.</h3>
+          <p>I write the test cases and the regression checklist, and set up the defect register and the chase board.</p>
+        </div>
+        <div class="step">
+          <span class="num">03</span>
+          <h3>You keep it.</h3>
+          <p>You keep the written pack and get a Monday digest.</p>
+        </div>
+      </div>
+      <figure class="how-photo">
+        <img src="images/working.jpg" width="896" height="1200" loading="lazy" alt="Ranjitha working at her laptop, writing a regression pack">
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 5 PRICE -->
+<section class="price reveal">
+  <div class="wrap">
+    <h2>The price</h2>
+    <p class="amount">Rs 30,000 a project</p>
+    <p class="included">One fixed price covers the whole release regression pack: the written test cases, the regression checklist, the shared defect register, and the chase board.</p>
+    <div class="faq">
+      <p><b>What do you need from us to start?</b> Your last few releases, and one person who knows the team.</p>
+      <p><b>Do we need a QA lead?</b> No. The pack is built for teams with no QA lead and no written regression suite.</p>
+      <p><b>Can we keep using the pack on our own?</b> Yes. You keep the pack and can run it without me.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 6 ENQUIRY -->
+<section class="enquiry reveal">
+  <div class="wrap">
+    <p class="big-line">Start with your last release.</p>
+    <div class="actions">
+      <a class="btn dark" href="https://cal.com/ranjitha/20-minute-intro-call">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+        Book a 20 minute call
+      </a>
+      <a class="btn cream" href="mailto:ranjitha2309sr@gmail.com?subject=Release%20regression%20pack%20enquiry">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+        Email me
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 7 FOOTER -->
+<footer>
+  <div class="wrap">
+    <p class="fname">ChaseBoard QA</p>
+    <p><a href="https://cal.com/ranjitha/20-minute-intro-call">Book a 20 minute call</a> &middot; <a href="mailto:ranjitha2309sr@gmail.com?subject=Release%20regression%20pack%20enquiry">ranjitha2309sr@gmail.com</a></p>
+    <p class="credit">Photos: Ranjitha&rsquo;s own photos.</p>
+  </div>
+</footer>
+
+<div class="bar">
+  <a href="https://cal.com/ranjitha/20-minute-intro-call">Book a 20 minute call</a>
+</div>
+
+</body>
+</html>
